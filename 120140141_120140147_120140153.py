@@ -1,8 +1,15 @@
 from sys import exit
 import numpy
 
+# Fungsi ini digunakan untuk meng-input matriks dari file
+# Edit isi file inputA.txt dan inputB.txt jika ingin mengedit matriks
+def inputpersFile():
+    x = numpy.loadtxt("bin\inputMatA.txt", dtype='f', delimiter=' ')
+    y = numpy.loadtxt("bin\inputMatB.txt", dtype='f', delimiter=' ')
+    return x, y
 
-def inputPers():
+# Fungsi meng-input matriks dari Terminal
+def inputpersManual():
     n = int(input("Input ukuran Matriks(n x n) : "))
     x = numpy.zeros((n,n), float)
     y = numpy.zeros(n, float)
@@ -20,7 +27,7 @@ def inputPers():
 
 # Mendefinisikan fungsi memproses SPL eliminasi Gauss
 def gauss():
-    x, y = inputPers()
+    x, y = menuInput()
     n = len(y)  # Menentukan panjang dari inputan yang ada di variabel y
     A = numpy.column_stack((x,y))
     X = numpy.zeros(n, float)
@@ -64,7 +71,7 @@ def gauss():
 
  # Mendefinisikan fungsi Gauss-Jordan
 def gaussJordan():
-    x, y = inputPers()
+    x, y = menuInput()
     n = len(y)
 
     for i in range(n):
@@ -96,19 +103,32 @@ def solusiHasil(A, B): # Fungsi ini diatur untuk mengecek apakah terdapat solusi
     if numpy.all(numpy.isinf(B)):
         print("-----------------------")
         print("Hasil: Tidak ada Solusi")
+
+        with open('bin\outputHasil.txt', 'a') as out:
+            print("-----------------------", file = out)
+            print("Hasil: Tidak ada Solusi", file = out)
         return
 
     elif numpy.all(numpy.isnan(B)):
         print("-----------------------")
         print(" Hasil: Solusi Banyak")
+
+        with open('bin\hasil.txt', 'a') as out:
+            print("-----------------------", file = out)
+            print("Hasil: Solusi Banyak", file = out)
         return
 
+    # Code dibawah ini akan berjalan apabila matriks ada solusi namun tidak solusi banyak
     print("Bentuk Matriks setelah di OBE : ")
     print(A)
     print()
     print("Matriks Hasil Eliminasi : ")
     for j in range(len(B)):
-        print("X%d = %0.1f" %(j+1, B[j]) ,  end='\n')
+        print("x%d = %0.1f" %(j+1, B[j]) ,  end='\n')
+
+    with open('bin\hasil.txt', 'ab') as out:
+        numpy.savetxt(out,A,fmt='%0.1f',delimiter = ' ', header='Matrix A Setelah OBE : ')
+        numpy.savetxt(out,B,fmt='%0.1f',delimiter = '\n', header='Hasil Eliminasi',footer='---------------------------------------------')
 
 def mainMenu():
     print("--------- SELAMAT DATANG ---------")
@@ -134,6 +154,25 @@ def mainMenu():
         print("Input Salah, Tolong Ulang Kembali..")
         mainMenu()
     return x, y
+
+def menuInput():
+    print("------ MENU INPUT PROGRAM ------")
+    print("-   [1]. Input dari File       -")
+    print("-   [2]. Input dari Terminal   -")
+    print("-   [99]. Kembali ke Menu      -")
+    print("--------------------------------")
+    pilih = int(input("Pilihan Anda(1/2/99) : "))
+    if pilih == 1:
+        x, y = inputpersFile()
+    elif pilih == 2:
+        x, y = inputpersManual()
+    elif pilih == 99:
+        x, y = mainMenu()
+    else:
+        print("Silahkan Coba Lagi..")
+        menuInput()
+    return x, y
+        
 
 # Diibaratkan sebagai Fungsi main di C++, dengan memanggil fungsi" diatas
 X, B = mainMenu()
